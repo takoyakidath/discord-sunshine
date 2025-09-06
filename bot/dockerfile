@@ -12,4 +12,4 @@ RUN npm install --production
 COPY . .
 
 # .env はイメージに含めない（外から渡す）
-CMD ["node", "bot.js"]
+CMD ["node", "index.js"]
