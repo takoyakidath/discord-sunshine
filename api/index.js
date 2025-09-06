@@ -12,10 +12,21 @@ app.get('/start-sunshine', (req, res) => {
     return res.status(403).send('Forbidden');
   }
 
-  // start コマンド経由で GUI アプリを起動
-  exec(`start "" "${SUNSHINE_PATH}"`, { shell: 'cmd.exe' }, (error) => {
+  // start コマンド経由で GUI アプリを起動しつつログを全部拾う
+  exec(`start "" "${SUNSHINE_PATH}"`, { shell: 'cmd.exe' }, (error, stdout, stderr) => {
+    console.log("===== Sunshine 起動ログ =====");
     if (error) {
-      console.error(error);
+      console.error("Error object:", error);
+    }
+    if (stdout) {
+      console.log("STDOUT:", stdout);
+    }
+    if (stderr) {
+      console.error("STDERR:", stderr);
+    }
+    console.log("=============================");
+
+    if (error) {
       return res.status(500).send('Sunshine の起動に失敗しました');
     }
     res.send('Sunshine を起動しました 🚀');
