@@ -1,2 +1,5 @@
 /api/.env
 /bot/.env
+
+/api/node_modules
+/bot/node_modules
