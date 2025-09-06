@@ -1,0 +1,15 @@
+# Node.js の軽量イメージを使用
+FROM node:20-alpine
+
+# 作業ディレクトリ
+WORKDIR /app
+
+# package.json / package-lock.json を先にコピーして依存解決
+COPY package*.json ./
+RUN npm install --production
+
+# ソースコードをコピー
+COPY . .
+
+# .env はイメージに含めない（外から渡す）
+CMD ["node", "bot.js"]
