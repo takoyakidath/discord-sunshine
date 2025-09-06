@@ -3,34 +3,40 @@ const express = require('express');
 const { exec } = require('child_process');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 47823;
 const API_KEY = process.env.API_KEY;
-const SUNSHINE_PATH = process.env.SUNSHINE_PATH;
+const SERVICE_NAME = process.env.SERVICE_NAME;  
 
-app.get('/start-sunshine', (req, res) => {
-  if (req.query.key !== API_KEY) {
-    return res.status(403).send('Forbidden');
-  }
-
-  // start コマンド経由で GUI アプリを起動しつつログを全部拾う
-  exec(`start "" "${SUNSHINE_PATH}"`, { shell: 'cmd.exe' }, (error, stdout, stderr) => {
-    console.log("===== Sunshine 起動ログ =====");
-    if (error) {
-      console.error("Error object:", error);
-    }
-    if (stdout) {
-      console.log("STDOUT:", stdout);
-    }
-    if (stderr) {
-      console.error("STDERR:", stderr);
-    }
-    console.log("=============================");
+// 汎用関数
+function runServiceCommand(command, res) {
+  exec(`powershell -Command "${command}"`, { shell: 'powershell.exe' }, (error, stdout, stderr) => {
+    console.log("STDOUT:", stdout);
+    console.error("STDERR:", stderr);
 
     if (error) {
-      return res.status(500).send('Sunshine の起動に失敗しました');
+      console.error("Error:", error);
+      return res.status(500).send(`❌ サービス操作に失敗しました: ${stderr || error.message}`);
     }
-    res.send('Sunshine を起動しました 🚀');
+    res.send(`✅ サービスを操作しました: ${stdout}`);
   });
+}
+
+// Sunshine 起動
+app.get('/sunshine/start', (req, res) => {
+  if (req.query.key !== API_KEY) return res.status(403).send('Forbidden');
+  runServiceCommand(`Start-Service -Name ${SERVICE_NAME}`, res);
+});
+
+// Sunshine 停止
+app.get('/sunshine/stop', (req, res) => {
+  if (req.query.key !== API_KEY) return res.status(403).send('Forbidden');
+  runServiceCommand(`Stop-Service -Name ${SERVICE_NAME}`, res);
+});
+
+// 状態確認
+app.get('/sunshine/status', (req, res) => {
+  if (req.query.key !== API_KEY) return res.status(403).send('Forbidden');
+  runServiceCommand(`Get-Service -Name ${SERVICE_NAME} | Select-Object Status`, res);
 });
 
 app.listen(PORT, () => {
