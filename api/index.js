@@ -1,4 +1,3 @@
-// api.js
 require('dotenv').config();
 const express = require('express');
 const { exec } = require('child_process');
@@ -13,7 +12,8 @@ app.get('/start-sunshine', (req, res) => {
     return res.status(403).send('Forbidden');
   }
 
-  exec(`"${SUNSHINE_PATH}"`, (error) => {
+  // start コマンド経由で GUI アプリを起動
+  exec(`start "" "${SUNSHINE_PATH}"`, { shell: 'cmd.exe' }, (error) => {
     if (error) {
       console.error(error);
       return res.status(500).send('Sunshine の起動に失敗しました');
